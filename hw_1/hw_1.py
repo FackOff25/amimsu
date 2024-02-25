@@ -6,6 +6,7 @@ import make_graph
 import csv_reader as csv
 import limit_probaility
 import simulation
+import average
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-t', '--taskfile', help='file with variants', required=False, type=str, default='Task1.csv')
@@ -14,6 +15,8 @@ parser.add_argument('-v', '--variant', help='variant to make', required=False, t
 parser.add_argument('-e', '--error', help='acceptable error when comparing numbers', required=False, type=float, default=1e-8)
 parser.add_argument('-r', '--resultfile', help='file to save experiment results to', required=False, type=str, default='results/results.csv')
 parser.add_argument('-c', '--visitfile', help='file to save visits count to', required=False, type=str, default='results/visits.csv')
+parser.add_argument('-a', '--avgfile', help='file to save squear average dispersion to', required=False, type=str, default='results/average.csv')
+
 args = vars(parser.parse_args())
 
 taskFile = args['taskfile']
@@ -22,6 +25,7 @@ variant = args['variant']
 error = args['error']
 resultfile = args['resultfile']
 visitfile = args['visitfile']
+avgfile = args['avgfile']
 
 print(f"Taskfile: {taskFile}, variant: {variant}, graph will be in file {graphFile}")
 
@@ -69,3 +73,8 @@ file2.close()
 randomlist = random.sample(range(50), 3)
 for i in range(3):
     simulation.make_plot(experiment_results[randomlist[i]], 'results/plot' + str(i+1) + '.png')
+
+squear = average.calculate_squear_errors([[v/100 for v in vector] for vector in visit_counts])
+file3 = open(avgfile, 'w')
+file3.write(f'{squear}')
+file3.close()
