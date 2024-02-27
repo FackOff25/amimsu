@@ -36,7 +36,14 @@ make_graph.make_graph(P, graphFile)
 # рассчитать предельные вероятности
 # записать предельную матрицу переходов
 P_l = limit_probaility.get_limit_probability_matrix(P)
-print(P_l)
+limitFile = open("results/limit.csv", 'w')
+for vector in P_l.tolist():
+    line = ""
+    for el in vector:
+        line += str("{:.2f}".format(el)) + ','
+    line = line[:-1]
+    limitFile.write(line + '\n')
+limitFile.close()
 print(f'Check if limit matrix right: {limit_probaility.check_limit_matrix(P_l, error)}')
 
 experiment_results = []
