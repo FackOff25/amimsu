@@ -84,6 +84,7 @@ file2.close()
 randomlist = random.sample(range(50), 3)
 for i in range(3):
     simulation.make_plot(experiment_results[randomlist[i]], 'results/plot' + str(i+1) + '.png')
+    simulation.clear_plot()
 
 file3 = open(avgfile, 'w')
 

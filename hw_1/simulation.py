@@ -12,7 +12,7 @@ def simulate_step(step_vector: list) -> int:
 
 def simulate_a_lot_of_steps(P: np.matrix, start_state: int, steps_number: int) -> (np.array, dict):
     state = start_state
-    results = list()
+    results = list([state])
     visit_count = {}
     P = P.tolist()
     for i in range (len(P)):
@@ -29,4 +29,6 @@ def make_plot(state_list: list, file: str):
     plt.ylabel('Состояние')
     plt.plot(range(len(state_list)), state_list)
     plt.savefig(file)
+
+def clear_plot():
     plt.clf()

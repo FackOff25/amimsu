@@ -4,6 +4,7 @@ import numpy as np
 import os
 import argparse
 import sys
+import random
 
 import state_classes
 import csv_maker
@@ -64,3 +65,55 @@ for k in new_classes.keys():
     # рассчитать предельные вероятности
     # записать предельную матрицу переходов
     print(limit_probaility.get_limit_probability_matrix(P_l))
+
+experiment_results = []
+visit_counts = []
+steps_num = 100
+random.seed(3)
+# повторить эксперимент 10 раз для каждого исходного состояния
+for i in range(10):
+    # перебираем все состояния в качестве исходных
+    for start_state in range(len(P)):
+        # случайно разыграть переход в новое состояние, учитывая распределение вероятностей перехода
+        experiment_result, visit_count = simulation.simulate_a_lot_of_steps(P, start_state, steps_num)
+        experiment_results.append(experiment_result)
+        visit_counts.append(visit_count)
+
+file1 = open(resultfile, 'w')
+for experiment in experiment_results:
+    line = ""
+    for state in experiment:
+        line += str(state) + ','
+    line = line[:-1]
+    file1.write(line + '\n')
+file1.close()
+
+print(average.calculate_average_vector(visit_counts) / steps_num)
+
+# составить таблицу для сравнения относительных частот наблюдений вхождения в каждое из состояний системы
+file2 = open(visitfile, 'w')
+for visit_count in visit_counts:
+    line = ""
+    for visit in visit_count.keys():
+        line += str(visit_count[visit] / steps_num) + ','
+    line = line[:-1]
+    file2.write(line + '\n')
+file2.close()
+
+# построить «графики» переключений состояний цепи
+for k in new_classes.keys():
+    if k == 0:
+        # стартовать по 6 раза внутри каждого класса существенных состояний
+        experiment_set_list = random.sample(range(10), 6)
+        for exp_set in experiment_set_list:
+            state = random.randint(0, len(new_classes[k]) - 1)
+            idx = exp_set * len(P) + state
+            print(experiment_results[idx])
+            simulation.make_plot(experiment_results[idx], 'results/plot.png')
+    else:
+        # стартовать по 2 раза внутри каждого класса существенных состояний
+        randomlist = random.sample(new_classes[k], 2)
+        for i in range(2):
+            simulation.make_plot(experiment_results[randomlist[i]], 'results/plot.png')
+
+simulation.clear_plot()
