@@ -25,6 +25,7 @@ parser.add_argument('-e', '--error', help='acceptable error when comparing numbe
 parser.add_argument('-r', '--resultfile', help='file to save experiment results to', required=False, type=str, default='results/results.csv')
 parser.add_argument('-c', '--visitfile', help='file to save visits count to', required=False, type=str, default='results/visits.csv')
 parser.add_argument('-a', '--avgfile', help='file to save square average dispersion to', required=False, type=str, default='results/average.csv')
+parser.add_argument('-p', '--plotfile', help='file to save experiments plots to', required=False, type=str, default='results/plot.png')
 
 args = vars(parser.parse_args())
 
@@ -35,6 +36,7 @@ error = args['error']
 resultfile = args['resultfile']
 visitfile = args['visitfile']
 avgfile = args['avgfile']
+plotfile = args['plotfile']
 
 print(f"Taskfile: {taskFile}, variant: {variant}, graph will be in file {graphFile}")
 
@@ -109,11 +111,11 @@ for k in new_classes.keys():
             state = random.randint(0, len(new_classes[k]) - 1)
             idx = exp_set * len(P) + state
             print(experiment_results[idx])
-            simulation.make_plot(experiment_results[idx], 'results/plot.png')
+            simulation.make_plot(experiment_results[idx], plotfile)
     else:
         # стартовать по 2 раза внутри каждого класса существенных состояний
         randomlist = random.sample(new_classes[k], 2)
         for i in range(2):
-            simulation.make_plot(experiment_results[randomlist[i]], 'results/plot.png')
+            simulation.make_plot(experiment_results[randomlist[i]], plotfile)
 
 simulation.clear_plot()
