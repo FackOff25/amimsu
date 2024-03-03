@@ -5,6 +5,9 @@ import os
 import argparse
 import sys
 
+import state_classes
+import csv_maker
+
 sys.path.insert(0, '../')
 
 import hw_1.make_graph as make_graph
@@ -35,20 +38,29 @@ avgfile = args['avgfile']
 print(f"Taskfile: {taskFile}, variant: {variant}, graph will be in file {graphFile}")
 
 P = csv.get_matrix(taskFile, variant)
+# Вывод cтарой матрицы
+print("Изначальная матрица:")
+print(P)
+classes = state_classes.get_sets(P)
+P = state_classes.transform_to_packed_matrix(P)
+# Вывод новой матрицы
+print("Изменённая матрица:")
+print(P)
+packedFile = open("results/packed.csv", 'w')
+packedFile.write(csv_maker.get_matrix(P))
+packedFile.close()
+
 # нарисовать граф цепи
 os.makedirs(os.path.dirname(graphFile), exist_ok=True)
 make_graph.make_graph(P, graphFile)
 
-# рассчитать предельные вероятности
-# записать предельную матрицу переходов
-P_l = limit_probaility.get_limit_probability_matrix(P)
-
-limitFile = open("results/limit.csv", 'w')
-for vector in P_l.tolist():
-    line = ""
-    for el in vector:
-        line += str("{:.2f}".format(el)) + ','
-    line = line[:-1]
-    limitFile.write(line + '\n')
-limitFile.close()
-print(f'Check if limit matrix right: {limit_probaility.check_limit_matrix(P_l, error)}')
+new_classes = state_classes.get_sets(P)
+for k in new_classes.keys():
+    if k == 0:
+        continue
+    cl = new_classes[k]
+    grid = np.ix_(np.arange(cl[0], cl[len(cl) - 1] + 1), np.arange(cl[0], cl[len(cl) - 1] + 1))
+    P_l = P[grid]
+    # рассчитать предельные вероятности
+    # записать предельную матрицу переходов
+    print(limit_probaility.get_limit_probability_matrix(P_l))

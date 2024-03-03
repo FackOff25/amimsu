@@ -15,5 +15,6 @@ def make_graph(A: np.matrix, filename: str):
     D.edge_attr.update(color='blue', arrowsize=1, fontcolor='red', fontsize=5, labeldistance='2', labelangle='0.0')
     D.graph_attr['dpi'] = '200'
     D.graph_attr['size'] = '1000'
+    D.graph_attr['nodesep'] = '0.25'
     pos = D.layout('circo')
     D.draw(filename)
