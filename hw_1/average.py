@@ -8,7 +8,7 @@ def calculate_average_vector(vectors: list) -> list:
             average[i] += v[i]
 
     for i in range(len(vectors[0])):
-        average /= vec_len
+        average[i] /= len(vectors)
 
     return average
 

@@ -66,6 +66,8 @@ for experiment in experiment_results:
     file1.write(line + '\n')
 file1.close()
 
+print(average.calculate_average_vector(visit_counts) / 100)
+
 # составить таблицу для сравнения относительных частот наблюдений вхождения в каждое из состояний системы
 file2 = open(visitfile, 'w')
 for visit_count in visit_counts:
