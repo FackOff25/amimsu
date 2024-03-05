@@ -13,6 +13,12 @@ def get_limit_probability_vector(P: np.matrix) -> np.matrix:
 def get_limit_probability_matrix(P: np.matrix) -> np.matrix:
     return np.matrix([get_limit_probability_vector(P) for i in range(len(P))])
 
+def get_limit_probability_matrix_by_pow(P: np.matrix) -> np.matrix:
+    P_l = P
+    for i in range(1000):
+        P_l = P_l.dot(P)
+    return P_l
+
 def check_limit_matrix(P: np.matrix, error: float) -> bool:
     length = len(P)
     vector = P[0]

@@ -43,12 +43,12 @@ print(f"Taskfile: {taskFile}, variant: {variant}, graph will be in file {graphFi
 P = csv.get_matrix(taskFile, variant)
 # Вывод cтарой матрицы
 print("Изначальная матрица:")
-print(P)
+print(csv_maker.get_matrix_sep(P, '\t'))
 classes = state_classes.get_sets(P)
 P = state_classes.transform_to_packed_matrix(P)
 # Вывод новой матрицы
 print("Изменённая матрица:")
-print(P)
+print(csv_maker.get_matrix_sep(P, '\t'))
 packedFile = open("results/packed.csv", 'w')
 packedFile.write(csv_maker.get_matrix(P))
 packedFile.close()
@@ -68,7 +68,7 @@ for k in new_classes.keys():
     # рассчитать предельные вероятности
     # записать предельную матрицу переходов
     print('Предельная матрица класса №' + str(k))
-    print(limit_probaility.get_limit_probability_matrix(P_l))
+    print(csv_maker.get_matrix_sep(limit_probaility.get_limit_probability_matrix(P_l), ' '))
     limit_vectors[k] = limit_probaility.get_limit_probability_vector(P_l)
 
 reduced_matrix_size = len(new_classes[0]) + len(new_classes) - 1
@@ -88,20 +88,31 @@ for i in new_classes[0]:
                 sums[cl].append(sum)
 
 print("Сокращённая матрица")
-print(P_r)
-limitfile = open('results/limit.csv', 'w')
-limitfile.write(csv_maker.get_matrix(limit_probaility.get_limit_probability_matrix(P_r)))
-limitfile.close()
+print(csv_maker.get_matrix_sep(P_r, '\t'))
+P_r_l = limit_probaility.get_limit_probability_matrix_by_pow(P_r)
+print("Предельная сокращённая матрица")
+print(csv_maker.get_matrix_sep(P_r_l, '\t'))
 
-P_r_l = np.zeros((len(P), len(P)))
+P_l = np.zeros((len(P), len(P)))
 for i in new_classes[0]:
     for j in new_classes[0]:
-        P_r_l[i][j] = 0
+        P_l[i][j] = 0
     for cl in new_classes.keys():
         if cl != 0:
             sum = np.sum(P[np.ix_(np.array([i]), np.arange(new_classes[cl][0], new_classes[cl][len(new_classes[cl]) - 1] + 1))])
             for j in range(len(new_classes[cl])):
-                P_r_l[i][new_classes[cl][j]] = np.sum(sums[cl]) * limit_vectors[cl][j]
+                P_l[i][new_classes[cl][j]] = P_r_l.item(i, len(new_classes[0]) + cl - 1) * limit_vectors[cl][j]
+
+for cl in new_classes.keys():
+    if cl != 0:
+        first = new_classes[cl][0]
+        for s_i in new_classes[cl]:
+            for s_j in new_classes[cl]:
+                P_l[s_i][s_j] = limit_vectors[cl][s_j-first]
+
+limitfile = open('results/limit.csv', 'w')
+limitfile.write(csv_maker.get_matrix(P_l))
+limitfile.close()
 
 experiment_results = []
 visit_counts = []
@@ -126,7 +137,7 @@ for experiment in experiment_results:
 file1.close()
 
 print('Средняя частота посещения')
-print(average.calculate_average_vector(visit_counts) / steps_num)
+print(csv_maker.get_vector_sep(average.calculate_average_vector(visit_counts) / steps_num, '\t'))
 
 # составить таблицу для сравнения относительных частот наблюдений вхождения в каждое из состояний системы
 file2 = open(visitfile, 'w')
