@@ -58,6 +58,7 @@ os.makedirs(os.path.dirname(graphFile), exist_ok=True)
 make_graph.make_graph(P, graphFile)
 
 new_classes = state_classes.get_sets(P)
+limit_vectors = {}
 for k in new_classes.keys():
     if k == 0:
         continue
@@ -66,7 +67,41 @@ for k in new_classes.keys():
     P_l = P[grid]
     # рассчитать предельные вероятности
     # записать предельную матрицу переходов
+    print('Предельная матрица класса №' + str(k))
     print(limit_probaility.get_limit_probability_matrix(P_l))
+    limit_vectors[k] = limit_probaility.get_limit_probability_vector(P_l)
+
+reduced_matrix_size = len(new_classes[0]) + len(new_classes) - 1
+P_r = np.eye(reduced_matrix_size)
+sums = {}
+for i in new_classes[0]:
+    for j in new_classes[0]:
+        P_r[i][j] = P.item(i,j)
+    for cl in new_classes.keys():
+        if cl != 0:
+            sum = np.sum(P[np.ix_(np.array([i]), np.arange(new_classes[cl][0], new_classes[cl][len(new_classes[cl]) - 1] + 1))])
+            P_r[i][len(new_classes[0]) + cl - 1] = sum
+            try:
+                sums[cl].append(sum)
+            except KeyError:
+                sums[cl] = []
+                sums[cl].append(sum)
+
+print("Сокращённая матрица")
+print(P_r)
+limitfile = open('results/limit.csv', 'w')
+limitfile.write(csv_maker.get_matrix(limit_probaility.get_limit_probability_matrix(P_r)))
+limitfile.close()
+
+P_r_l = np.zeros((len(P), len(P)))
+for i in new_classes[0]:
+    for j in new_classes[0]:
+        P_r_l[i][j] = 0
+    for cl in new_classes.keys():
+        if cl != 0:
+            sum = np.sum(P[np.ix_(np.array([i]), np.arange(new_classes[cl][0], new_classes[cl][len(new_classes[cl]) - 1] + 1))])
+            for j in range(len(new_classes[cl])):
+                P_r_l[i][new_classes[cl][j]] = np.sum(sums[cl]) * limit_vectors[cl][j]
 
 experiment_results = []
 visit_counts = []
@@ -90,6 +125,7 @@ for experiment in experiment_results:
     file1.write(line + '\n')
 file1.close()
 
+print('Средняя частота посещения')
 print(average.calculate_average_vector(visit_counts) / steps_num)
 
 # составить таблицу для сравнения относительных частот наблюдений вхождения в каждое из состояний системы
@@ -110,7 +146,6 @@ for k in new_classes.keys():
         for exp_set in experiment_set_list:
             state = random.randint(0, len(new_classes[k]) - 1)
             idx = exp_set * len(P) + state
-            print(experiment_results[idx])
             simulation.make_plot(experiment_results[idx], plotfile)
     else:
         # стартовать по 2 раза внутри каждого класса существенных состояний
