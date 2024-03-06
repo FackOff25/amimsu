@@ -40,6 +40,8 @@ plotfile = args['plotfile']
 
 print(f"Taskfile: {taskFile}, variant: {variant}, graph will be in file {graphFile}")
 
+os.makedirs(os.path.dirname(graphFile), exist_ok=True)
+
 P = csv.get_matrix(taskFile, variant)
 # Вывод cтарой матрицы
 print("Изначальная матрица:")
@@ -54,7 +56,6 @@ packedFile.write(csv_maker.get_matrix(P))
 packedFile.close()
 
 # нарисовать граф цепи
-os.makedirs(os.path.dirname(graphFile), exist_ok=True)
 make_graph.make_graph(P, graphFile)
 
 new_classes = state_classes.get_sets(P)
